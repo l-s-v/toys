@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
+<style>
+
+body {
+    display: flex;
+}
+
+textarea {
+    display: inline-block;
+    min-height: 400px;
+    min-width: 400px;
+    height: 100%;
+}
+
+.arvore {
+    font-family: FontAwesome;    
+    background-color:#fbfbfb;
+    border:1px solid #999;
+
+    min-height:20px;
+
+    width: 100%;
+}
+
+.arvore li {
+    list-style-type:none;
+    position:relative;
+    /* padding-top:10px; */
+    margin-left: -15px;
+}
+
+.arvore li::before,
+.arvore li::after {
+    content:'';
+    left:-33px;
+    position:absolute;
+    right:auto;
+}
+
+.arvore li::before {
+    border-left:1px solid #999;
+    height:100%;
+    top:-6px;
+}
+
+.arvore li::after {
+    border-top:1px solid #999;
+    top:6px;
+    width:18px;
+}
+
+.arvore li:last-child::before {
+    height:13px;
+}
+
+
+.arvore > ul > li::before,
+.arvore > ul > li::after {
+    border: none;
+}
+
+.arvore li span {
+    display:inline-block;
+    text-decoration:none;
+    /* padding-top:5px; */
+    margin-left: -15px;
+}
+
+.arvore li span::before {
+    padding-right:5px;
+}
+
+.arvore li span.folder {
+    cursor:pointer;
+}
+
+.arvore li span.folder::before {
+    content: "\f07c";
+    color: #EDCA4A;
+    z-index: 999;
+    position: relative;
+}
+
+.arvore li.toogle span.folder::before {
+    content: "\f07b";
+}
+
+.arvore li span::before {
+    color: green;
+}
+
+.arvore li span:hover {
+    background:#eee;
+}
+
+.arvore li.toogle > ul {
+    display: none;
+}
+
+#editor { 
+    width: 80%;
+    height: 250px;
+}
+</style>
+
+<script>
+    /**
+     * Cria a estrutura em árvore utilizando ul e li com base no texto informado.
+     */
+     var criarEstrutura = function() {
+        var raiz = document.getElementsByClassName("arvore")[0];
+        // Quebra as linhas
+        var linhas = document.getElementsByTagName("textarea")[0].value.split("\n");
+
+        // Limpa a execução anterior
+        raiz.innerHTML = "";
+        var conteudo;
+        var li;
+        var nivel = 0;
+                
+        for(var l = 0; l < linhas.length; l++) {
+            var linha = linhas[l];
+            // Ignora linhas sem texto e que não comecem com "* "
+            if(linha.trim() != "" && linha.trim().substring(0, 2) == "* ") {
+                // remove o "* ""
+                linha = linha.replace("* ", "");
+                // Guarda o último nível executado
+                var ultimoNivel = nivel;
+                // Identifica o nível pelo número de "tab" no início
+                nivel = linha.split(/[^\t]/)[0].length;
+                // Sempre que voltar para a raiz deve reiniciar a árvore
+                if(nivel == 0) {
+                    conteudo = new Object();
+                }
+                // Se o nível ainda não tiver sido adicionado ou se o último nivel utilizado foi inferior
+                if(conteudo[nivel] == null || ultimoNivel < nivel) {
+                    // Cria uma nova ul que será raiz para os próximos li
+                    conteudo[nivel] = (nivel == 0 ? raiz : li).appendChild(document.createElement("ul"));
+                }
+                // Adiciona a li ao nível atual
+                li = conteudo[nivel].appendChild(criarLinha(linha));
+            }
+        }
+
+        // Aplica as configurações de estilo e eventos
+        configurar();
+    };
+        
+    /**
+     * Efetua as configurações com base na estrutura criada.
+     */
+    var configurar = function() {
+        // Identifica todos os itens
+        var itens = document.getElementsByTagName("span");
+
+        for(var l = 0; l < itens.length; l++) {
+            // Se for pasta
+            if(itens[l].nextElementSibling && itens[l].nextElementSibling.tagName == "UL") {
+                itens[l].classList.add("folder");
+                itens[l].onclick = function(){
+                    fnClick(this.parentElement)
+                };
+            }
+            // Se for item
+            else {
+                itens[l].classList.add("file");
+
+                var extensao = itens[l].textContent.split('.').pop();
+                var nomeClasse = null;
+
+                switch(extensao) {
+                    case "xls":
+                        nomeClasse = "excel";
+                        break;
+                    case "pdf":
+                        nomeClasse = extensao;
+                }
+
+                itens[l].classList.add("fa-file-" + (nomeClasse ? nomeClasse + "-" : "") + "o");               
+            }
+        }
+    };
+
+    /**
+     * Função de click das pastas.
+     */
+    var fnClick = function(obj) {
+        var className = "toogle";
+
+        if(obj.classList.contains(className)) {
+            obj.classList.remove(className);
+        }
+        else {
+            obj.classList.add(className);
+        }
+        return false;
+    };
+
+    /**
+     * Cria uma nova linha com o padrão necessário.
+     */
+    var criarLinha = function(texto) {
+        var li = document.createElement("li");
+        var span = li.appendChild(document.createElement("span"));
+        span.textContent = texto.trim();
+
+        return li;
+    };
+
+    /**
+     * Tratamento para permitir utilizar o comando tab dentro do textarea
+     */
+    var tratarTab = function() {
+        if(event.keyCode==9 || event.which==9){
+            event.preventDefault();
+            var s = event.target.selectionStart;
+            event.target.value = event.target.value.substring(0, event.target.selectionStart) + "\t" + event.target.value.substring(event.target.selectionEnd);
+            event.target.selectionEnd = s+1; 
+        }
+    };
+</script>
+</head>
+<body>
+    <textarea onkeydown="tratarTab()"></textarea>
+    <input type="button" value="TO" onclick="criarEstrutura()"/>
+    <div class="arvore"></div>
+</body>
+</html> 
