@@ -14,6 +14,9 @@ textarea {
     min-width: 400px;
     height: 100%;
     outline: none;
+    -moz-tab-size: 2; /* Firefox */
+    -o-tab-size: 2; /* Opera 10.6-12.1 */
+    tab-size: 2;
 }
 
 .arvore {
@@ -245,10 +248,12 @@ textarea {
      */
     var tratarTab = function() {
         if(event.keyCode == 9 || event.which == 9){
+            var obj = event.target;
+
             event.preventDefault();
-            var s = event.target.selectionStart;
-            event.target.value = event.target.value.substring(0, event.target.selectionStart) + "\t" + event.target.value.substring(event.target.selectionEnd);
-            event.target.selectionEnd = s+1; 
+            var s = obj.selectionStart;
+            obj.value = obj.value.substring(0, obj.selectionStart) + "\t" + obj.value.substring(obj.selectionEnd);
+            obj.selectionEnd = s + 1; 
         }
     };
 </script>
