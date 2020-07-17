@@ -13,6 +13,7 @@ textarea {
     min-height: 400px;
     min-width: 400px;
     height: 100%;
+    outline: none;
 }
 
 .arvore {
@@ -23,6 +24,10 @@ textarea {
     min-height:20px;
 
     width: 100%;
+}
+
+.arvore ul {
+    margin: 0;
 }
 
 .arvore li {
@@ -100,9 +105,25 @@ textarea {
     display: none;
 }
 
-#editor { 
-    width: 80%;
-    height: 250px;
+.bt {
+    display: flex;
+    align-items: center;
+}
+
+.bt span {
+    display: flex;
+    align-items: center;
+    height: 99%;
+    padding-left: 5px;
+    padding-right: 5px;
+    cursor: pointer;
+    background: #56563614;
+    border: ridge;
+    color: #279e9e;
+}
+
+.bt span:hover {
+    color: #c74040;
 }
 </style>
 
@@ -129,7 +150,7 @@ textarea {
                 linha = linha.replace("* ", "");
                 // Guarda o último nível executado
                 var ultimoNivel = nivel;
-                // Identifica o nível pelo número de "tab" no início
+                // Identifica o nível pelo número de tabulações no início
                 nivel = linha.split(/[^\t]/)[0].length;
                 // Sempre que voltar para a raiz deve reiniciar a árvore
                 if(nivel == 0) {
@@ -138,10 +159,19 @@ textarea {
                 // Se o nível ainda não tiver sido adicionado ou se o último nivel utilizado foi inferior
                 if(conteudo[nivel] == null || ultimoNivel < nivel) {
                     // Cria uma nova ul que será raiz para os próximos li
-                    conteudo[nivel] = (nivel == 0 ? raiz : li).appendChild(document.createElement("ul"));
+                    if(nivel == 0) {
+                        conteudo[nivel] = raiz.appendChild(document.createElement("ul"));
+                    }
+                    else {
+                        conteudo[nivel] = li.getElementsByTagName("ul")[0];
+                    }
                 }
                 // Adiciona a li ao nível atual
                 li = conteudo[nivel].appendChild(criarLinha(linha));
+                // Se não tiver extensão
+                if(linha.indexOf('.') == -1){
+                    li.appendChild(document.createElement("ul"));
+                }
             }
         }
 
@@ -214,7 +244,7 @@ textarea {
      * Tratamento para permitir utilizar o comando tab dentro do textarea
      */
     var tratarTab = function() {
-        if(event.keyCode==9 || event.which==9){
+        if(event.keyCode == 9 || event.which == 9){
             event.preventDefault();
             var s = event.target.selectionStart;
             event.target.value = event.target.value.substring(0, event.target.selectionStart) + "\t" + event.target.value.substring(event.target.selectionEnd);
@@ -224,8 +254,8 @@ textarea {
 </script>
 </head>
 <body>
-    <textarea onkeydown="tratarTab()"></textarea>
-    <input type="button" value="TO" onclick="criarEstrutura()"/>
+    <textarea onkeydown="tratarTab()" placeholder="Informe a estrutura de pastas como no markdown, utilizando tabulação e *"></textarea>
+    <div class="bt"><span class="fa fa-arrow-right" onclick="criarEstrutura()" title="Executar"></span></div>
     <div class="arvore"></div>
 </body>
 </html> 
