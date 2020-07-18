@@ -96,10 +96,6 @@ textarea {
     content: "\f07b";
 }
 
-.arvore li span::before {
-    color: green;
-}
-
 .arvore li span:hover {
     background:#eee;
 }
@@ -128,6 +124,13 @@ textarea {
 .bt span:hover {
     color: #c74040;
 }
+
+.arvore li span::before                 {color: green;}
+.arvore li span.fa-file-code-o::before  {color: darkturquoise;}
+.arvore li span.fa-file-pdf-o::before   {color: red;}
+.arvore li span.fa-file-word-o::before  {color: blue;}
+.arvore li span.fa-file-text-o::before  {color: gray;}
+
 </style>
 
 <script>
@@ -200,22 +203,45 @@ textarea {
             // Se for item
             else {
                 itens[l].classList.add("file");
-
-                var extensao = itens[l].textContent.split('.').pop();
-                var nomeClasse = null;
-
-                switch(extensao) {
-                    case "xls":
-                        nomeClasse = "excel";
-                        break;
-                    case "pdf":
-                        nomeClasse = extensao;
-                }
+                var nomeClasse = getNomeIcone(itens[l].textContent.split('.').pop());               
 
                 itens[l].classList.add("fa-file-" + (nomeClasse ? nomeClasse + "-" : "") + "o");               
             }
         }
     };
+
+    /**
+     * Retorna o complemento do ícone de acordo com a extensao.
+     */
+    var getNomeIcone = function(extensao) {
+        switch(extensao) {
+            case "xls":
+            case "xlsx":
+                return "excel";
+            case "ppt":
+            case "pptx":
+                return "powerpoint";
+            case "doc":
+            case "docx":
+                return "word";
+            case "pdf":
+                return "pdf";
+            case "txt":
+                return "text";
+            case "mp3":
+                return "audio";
+                break;
+            case "jpg":
+            case "jpeg":
+            case "gif":
+                return "image";
+            case "groovy":
+            case "java":
+                return "code";
+        }
+
+        return null;
+    }
 
     /**
      * Função de click das pastas.
